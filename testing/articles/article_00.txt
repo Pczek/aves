@@ -1,0 +1,41 @@
+How I made a SaaS webservice earning $1000 monthly profit
+
+It all started with my other SaaS webservice called Postio, which I built to make it easier for people to find and publish content to their social accounts and groups. As a part of its marketing strategy, I had bought and published a dozen articles on various subjects targeted at the webservice’s audience on its blog to get some extra traffic from search engines.
+Then, all of a sudden, Postio started to get a relatively large amount of traffic from Google and Yandex (a Russian search engine) with keywords that have nothing to do with Postio itself.
+This is where the actual story begins.
+
+Identifying a pain point
+
+Clearly people were having real issues with this menu thing. A short research showed that a lot of group owners on Vk.com (the Russian Facebook) use a graphical menu fixed at the top of a group to redirect their audience to the most important parts of the group, such as testimonials, pricing, and an order form.
+
+You see, groups in this social network eventually become some sort of shop that many people use to start a business, without having the hassle of setting up a standalone website. So it wasn’t just a bunch of some random groups about kittens (although there definitely was a lot of this type), but small businesses with some pain point that could be solved, more or less, automatically. Obviously they needed a solution so badly that they Googled it quite often.
+But here’s the best part. In order to make this menu, they had to create it in an image editor, cut it, and then build the menu with a sort of wiki-style mark up. This was definitely too much for them, and outsourcing this job at a price of about $20 a piece was quite common.
+The usual process of creating a menu was something like this:
+1. In an image editor, create an image of the menu and place some buttons on it;
+2. Сut it into separate parts so that it would be possible to re-assemble it, with the buttons becoming links;
+3. Upload all these images to an album in the group or in the owner’s account;
+4. Create a wiki-page in the group and put a markup with the images and links;
+5. Publish a post with a link to the menu page in the group;
+6. Pin it so it stays on top all the time.
+Not bad, eh?
+Now, let’s find out what we can do to alleviate the problem.
+
+Making an MVP
+
+First, I had to explore the possibilities of the API of the social network to determine what actions could be automated, and to what degree.
+It turned out that the API could do anything I needed, with the exception of pinning a post. But it’s too much for an MVP, so I decided to cut down these features:
+1. Authentication.
+2. Menu customization. Instead, a user could choose from a dozen predefined templates.
+3. Payment processing. I could do this manually.
+4. Automatic wiki-page creation. A user could do it themselves and then paste the wiki-markup that my app generated.
+5. Automatic post publishing. Again, a user’s manual labor.
+
+So basically, what I had to make was an image generator and an uploader. So here is what it looked like after two to three days of development.
+
+Ugly, I know. But it was enough to test whether users would be willing to pay for this automated solution.
+
+The menu creation dialogue was also um… pretty imperfect.
+Yeah, I too used to be a perfectionist. Now I ship.
+
+SOURCE:
+https://hackernoon.com/how-i-made-a-saas-webservice-earning-1000-monthly-profit-6d2b782b95c8#.lurp56deu
