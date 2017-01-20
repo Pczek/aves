@@ -1,0 +1,18 @@
+# AWS Lambda
+
++ [Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
++ [Lambda+API Gateway](https://docs.aws.amazon.com/lambda/latest/dg/with-on-demand-https.html)
+
+## Limitations
+
+### AWS Lambda Resource Limits
+
+| Resource                                | Default Limit          | 
+| --------------------------------------- | ---------------------- |
+| Ephemeral disk capacity                 | ("/tmp" space)	512 MB | 
+| Number of file descriptors	          | 1,024                  |
+| Number of processes and threads         | (combined total) 1,024 |
+| Maximum execution duration per request  |	300 seconds            |
+| Invoke request body payload size        | (RequestResponse) 6 MB |
+| Invoke request body payload size        | (Event)	128 K          |
+| Invoke response body payload size       | (RequestResponse) 6 MB |
