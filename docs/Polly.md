@@ -4,9 +4,9 @@
 
 ## SynthesizeSpeech API Operation
 
-+ The size of the input text can be up to *1500 billed characters* (3000 total characters). SSML tags are not counted as billed characters.
++ The size of the input text can be up to **1500 billed characters** (3000 total characters). SSML tags are not counted as billed characters.
 + You can specify up to five lexicons to apply to the input text.
-+ The output audio stream (synthesis) is *limited to 5 minutes*, after which, any remaining speech is cut off.
++ The output audio stream (synthesis) is **limited to 5 minutes**, after which, any remaining speech is cut off.
 [API](http://docs.aws.amazon.com/polly/latest/dg/API_SynthesizeSpeech.html)
 
 ## Pronunciation Lexicons
