@@ -1,0 +1,31 @@
+{
+  "name": "AvesPlayer",
+  "version": "1.0.0",
+  "description": "Web Player for Aves",
+  "main": "src/js/AvesPlayer.js",
+  "scripts": {
+  	"watch": "webpack --watch --progress -d",
+  	"production": "webpack --progress --config ./webpack.config.production.js -p"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pczek/aves.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Pczek/aves/issues"
+  },
+  "homepage": "https://getAves.com",
+  "devDependencies": {
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-1": "^6.16.0",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
+    "webpack": "^1.14.0"
+  },
+  "dependencies": {
+    "normalize.css": "^5.0.0"
+  }
+}
