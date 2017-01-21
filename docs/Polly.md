@@ -28,5 +28,6 @@
 
 [SSML](https://www.w3.org/TR/2010/REC-speech-synthesis11-20100907/)
 
+## [Pricing](https://aws.amazon.com/polly/pricing/)
 
 

@@ -3,6 +3,7 @@
 ## Links
 
 + [AWS Javascript SDK](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS.html)
++ [Compability Table Javascript](http://kangax.github.io/compat-table/es6/)
 + [Polly Docs](http://docs.aws.amazon.com/polly/latest/dg/what-is.html)
 + [Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
 + [SSML](https://www.w3.org/TR/2010/REC-speech-synthesis11-20100907/)
