@@ -13,8 +13,7 @@ const setConfig = () => {
 	console.log("Config set!");
 };
 
-const speak = text => {
-	console.log("speak()");
+const synthesize = text => {
 	const params = {
 		OutputFormat: "mp3",
 		SampleRate: "8000",
@@ -22,66 +21,64 @@ const speak = text => {
 		TextType: "text",
 		VoiceId: "Joey"
 	};
-	console.log(JSON.stringify(params, null, 2));
+
 	const polly = new Polly();
-	polly.synthesizeSpeech(params, (err, data)=> {
-		console.log(JSON.stringify(err, null, 2));
-		console.log(Object.keys(data));
-		if (!err) {
-			saveAudioFile(data.AudioStream, "madewithtea.com", "article_02.mp3");
-		} else {
-			console.log(err);
-		}
-	})
+	return polly.synthesizeSpeech(params).promise();
 };
 
-const saveAudioFile = (file, customer, resourceName) => {
-	console.log("saveAudioFile()");
+const saveAudioStream = (as, customer, resourceName) => {
 	const bucket = "carrotbit.com";
-	const key = `${customer}/${resourceName}`;
+	const key = `${customer}/${resourceName}.mp3`;
 	const params = {
 		Bucket: bucket,
 		Key: key,
 		ACL: "public-read",
 		ContentType: "audio/mpeg",
-		Body: file,
+		Body: as,
 	};
-	const s3 = new S3();
-	s3.upload(params, function (err, data) {
-		if (err) {
-			console.log(err)
-		} else {
-			console.log(JSON.stringify(data, null, 2));
-			addMappingItem({
-				url: "madewithtea.com/mindfulness-in-the-culture-of-distraction.html",
-				location: data.Location,
-				customer: customer
-			})
-		}
-	});
 
+	const s3 = new S3();
+	return s3.upload(params).promise();
 };
 
 const addMappingItem = mapping => {
 	const TableName = "mapping";
-	var docClient = new DynamoDB.DocumentClient();
 	const params = {
 		TableName,
 		Item: mapping,
 	};
 
-	docClient.put(params).promise()
-		.then(data=> {
-			console.log("Mapping Saved:");
-			console.log(JSON.stringify(data, null, 2));
-		})
-		.catch(err=> {
-			console.log("Error While Saving Mapping");
-			console.log(JSON.stringify(err, null, 2));
-		});
+	var docClient = new DynamoDB.DocumentClient();
+	return docClient.put(params).promise();
 };
 
 setConfig();
-speak("Hello, I have an awesome voice, don't you think?");
 
-// addMappingItem({url: "example.com", location: "bucketId"});
+const callback = (error, success) => {
+	if (error) {
+		console.log(error);
+	} else {
+		console.log(JSON.stringify(success, null, 2));
+	}
+};
+
+const handleError = error => {
+	callback(error, null);
+};
+
+const URL = "https://www.madewithtea.com/mindfulness-in-the-culture-of-distraction.html";
+// TODO: Extract CUSTOMER/ARTICLE from URL
+const CUSTOMER = "madewithtea.com";
+const ARTICLE = "mindfulness-in-the-culture-of-distraction";
+
+synthesize("Hello, I have an awesome voice, don't you think?").then(data =>
+	saveAudioStream(data.AudioStream, CUSTOMER, ARTICLE).then(data=>
+		addMappingItem({
+			url: URL,
+			location: data.Location,
+			customer: CUSTOMER
+		}).then(data=>
+			callback(null, {location: "location"})
+		).catch(handleError)
+	).catch(handleError)
+).catch(handleError);
