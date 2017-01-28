@@ -5,6 +5,7 @@ const Polly = require('aws-sdk/clients/polly');
 
 
 const synthesize = text => {
+	console.log("synthesizing Text with Polly");
 	const params = {
 		Text: text,
 		OutputFormat: "mp3",
@@ -18,6 +19,7 @@ const synthesize = text => {
 };
 
 const saveAudioStream = (as, domain, resource) => {
+	console.log("saving Audio Stream to S3");
 	const bucket = "getaves.com";
 	const key = `${domain}/${resource}.mp3`;
 	const params = {
@@ -33,6 +35,7 @@ const saveAudioStream = (as, domain, resource) => {
 };
 
 const addMappingItem = mapping => {
+	console.log("adding Mapping to Dynamo");
 	const TableName = "mapping";
 	const params = {
 		TableName,
@@ -43,11 +46,10 @@ const addMappingItem = mapping => {
 	return docClient.put(params).promise();
 };
 
-
 const parseURL = rawURL => {
+	console.log("parsing ID");
 	const uriDecoded = decodeURIComponent(rawURL);
 	const url = new Buffer(uriDecoded, 'base64').toString('ascii'); // reverse base64 encoding
-	console.log('url', url);
 	const regex = /https?\:\/\/(?:www\.)?([^\/?#]+)(?:[\/?#]|$)/i;
 	const elements = url.match(regex);
 
@@ -66,6 +68,10 @@ exports.handler = (event, context, callback) => {
 	if (!event) {
 		callback("No Event passed!", null);
 	}
+
+	console.log('logGroupName =', context.logGroupName);
+	console.log('logStreamName =', context.logStreamName);
+
 	const obj = parseURL(event.id);
 	let location = null;
 	synthesize(event.text).then(pollyData =>
@@ -75,7 +81,7 @@ exports.handler = (event, context, callback) => {
 					url: obj.url,
 					location: s3Data.Location,
 					customer: obj.domain
-				}).then(dynamoData=>
+				}).then(dynamoData =>
 					callback(null, {location: location})
 				).catch(error => handleError(error, callback))
 			}
