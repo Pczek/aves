@@ -1,0 +1,121 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "CarrotBit API",
+        "description": "Text to Speech For News Articles",
+        "version": "1.0.0"
+    },
+    "host": "api.getaves.com",
+    "schemes": [
+        "https"
+    ],
+    "basePath": "/v1",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/audio": {
+            "get": {
+                "summary": "Return reference Option to the Audio File Already generated for the provided URL, if not 404 ist returned",
+                "description": "Get Audio Reference",
+                "tags": [
+                    "Public"
+                ],
+                "parameters": [
+                    {
+                        "name": "articleURL",
+                        "in": "query",
+                        "description": "URL to the article, if provided the requests origin is ignored.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Audio Reference Object",
+                        "schema": {
+                            "$ref": "#/definitions/AudioRef"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Synthesizes the audio file",
+                "description": "Text2Speech",
+                "tags": [
+                    "Public"
+                ],
+                "parameters": [
+                    {
+                        "name": "articleURL",
+                        "in": "query",
+                        "description": "URL to the article, if provided the requests origin is ignored.",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Audio Reference Object",
+                        "schema": {
+                            "$ref": "#/definitions/AudioRef"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Resource": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "base64URL encoded URL of currently watched page"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Title of the Text to be synthesized"
+                },
+                "text": {
+                    "type": "string",
+                    "description": "the actual text to be synthesized"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "name of the author"
+                }
+            }
+        },
+        "AudioRef": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "reference to the s3 audio fil"
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "cause": {
+                    "type": "string",
+                    "description": "Describing what went wrong."
+                }
+            }
+        }
+    }
+}

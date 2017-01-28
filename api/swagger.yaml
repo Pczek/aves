@@ -1,0 +1,53 @@
+swagger: '2.0'
+info:
+  title: CarrotBit API
+  description: Text to Speech For New Articles
+  version: "1.0.0"
+# the domain of the service
+host: api.uber.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /audio:
+    get:
+      summary: Product Types
+      description: Get Audio Reference
+      parameters:
+        - name: articleURL
+          in: query
+          description: URL to the article, if provided the requests origin is ignored.
+          required: false
+          type: number
+          format: double
+      tags:
+        - Public
+      responses:
+        200:
+          description: Audio Reference Object
+          schema:
+              $ref: '#/definitions/AudioRef'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  AudioRef:
+    type: object
+    properties:
+      location:
+        type: string
+        description: Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles.
+      length:
+        type: integer
+        description: Lenght of the playback in seconds
+  Error:
+    type: object
+    properties:
+      cause:
+        type: string
+        description: Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles.
