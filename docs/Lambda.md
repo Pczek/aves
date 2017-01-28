@@ -3,11 +3,20 @@
 + [Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
 + [Lambda+API Gateway](https://docs.aws.amazon.com/lambda/latest/dg/with-on-demand-https.html)
 
+## Pricing
+
++ [Pricing](https://aws.amazon.com/lambda/pricing/)
+
+| Memory (MB) | Price per 100ms ($) |
+| ----------- | ------------------- |
+| 128	      | 0.000000208         | 
+| 192         | 0.000000313         |
+
 ## Limitations
 
 ### AWS Lambda Resource Limits
 
-| Resource                                | Default Limit          | 
+| Resource                                | Default Limit          |
 | --------------------------------------- | ---------------------- |
 | Ephemeral disk capacity                 | ("/tmp" space)	512 MB | 
 | Number of file descriptors	          | 1,024                  |
