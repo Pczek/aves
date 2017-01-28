@@ -1,7 +1,7 @@
 "use strict";
 const DynamoDB = require('aws-sdk/clients/dynamodb');
 const S3 = require('aws-sdk/clients/s3');
-const Polly = require('aws-sdk/clients/Polly');
+const Polly = require('aws-sdk/clients/polly');
 
 
 const synthesize = text => {
