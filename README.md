@@ -13,6 +13,7 @@
 + [Requirements](./docs/Requirements.md)
 + [Polly](./docs/Polly.md)
 + [Lambda](./docs/Lambda.md)
++ [Text Extraction](./docs/TextExtraction.md)
 
 ## Need to Read
 
