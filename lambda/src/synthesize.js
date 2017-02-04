@@ -46,47 +46,26 @@ const addMappingItem = mapping => {
 	return docClient.put(params).promise();
 };
 
-const parseURL = rawURL => {
-	console.log("parsing ID");
-	const uriDecoded = decodeURIComponent(rawURL);
-	const url = new Buffer(uriDecoded, 'base64').toString('ascii'); // reverse base64 encoding
-	const regex = /https?\:\/\/(?:www\.)?([^\/?#]+)(?:[\/?#]|$)/i;
-	const elements = url.match(regex);
-
-	return {
-		domain: elements[1],
-		resource: url.replace(elements[0], ""),
-		url: url
-	};
-};
-
 const handleError = (service, error, callback) => {
-	console.error("An Error occured using " + service);
+	console.error("An Error occurred using " + service);
 	console.error("error", error);
 	callback(error, null);
 };
 
 exports.handler = (event, context, callback) => {
-	if (!event) {
-		callback("No Event passed!", null);
-	}
-
-	const obj = parseURL(event.id);
 	let location = null;
-	console.log("Synthesizing text...");
+	// shorten text, max 1500 chars
+	if (event.text.length > 1500) {
+		event.text = event.text.substring(0, 1500);
+	}
 	synthesize(event.text).then(pollyData => {
-		console.log("Synthesizing success!");
-		console.log("Saving AudioStream...");
-		saveAudioStream(pollyData.AudioStream, obj.domain, obj.resource).then(s3Data => {
-			console.log("Saving success!");
-			console.log("Mapping Location and Id...");
+		saveAudioStream(pollyData.AudioStream, event.host, event.resource).then(s3Data => {
 			location = s3Data.Location;
 			addMappingItem({
-				url: obj.url,
+				url: event.host + event.resource,
 				location: s3Data.Location,
-				customer: obj.domain
+				customer: event.host
 			}).then(dynamoData => {
-				console.log("Mapping success!");
 				const result = {location: location};
 				console.log("Returning Result", JSON.stringify(result, null, 2));
 				callback(null, result)

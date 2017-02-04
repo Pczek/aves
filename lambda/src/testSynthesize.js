@@ -2,7 +2,8 @@ const AWS = require('aws-sdk');
 const lambda = require('./synthesize');
 
 const mockEvent = {
-	"id": "aHR0cHM6Ly93d3cubWFkZXdpdGh0ZWEuY29tL21pbmltYWxpc20tdGhlLWFydC1vZi1saXZpbmctd2l0aC1sZXNzLmh0bWw%3D",
+	"host": "localhost",
+	"resource": "/index.html",
 	"author": "Jendrik Poloczek",
 	"published": "2017-01-28T10:58:03.961Z",
 	"title": "Minimalism: The Art of Living with Less",
