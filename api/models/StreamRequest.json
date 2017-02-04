@@ -1,0 +1,16 @@
+{
+  "title": "StreamRequest",
+  "type": "object",
+  "properties": {
+    "host": {
+      "type": "string"
+    },
+    "resource": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "host",
+    "resource"
+  ]
+}

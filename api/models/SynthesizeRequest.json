@@ -1,0 +1,33 @@
+{
+  "title": "SynthesizeRequest",
+  "type": "object",
+  "properties": {
+    "host": {
+      "type": "string"
+    },
+    "resource": {
+      "type": "string"
+    },
+    "author": {
+      "description": "Author of the Content",
+      "type": "string"
+    },
+    "published": {
+      "type": "string"
+    },
+    "title": {
+      "description": "Title of the Content",
+      "type": "string"
+    },
+    "text": {
+      "description": "Content text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "host",
+    "resource",
+    "title",
+    "text"
+  ]
+}

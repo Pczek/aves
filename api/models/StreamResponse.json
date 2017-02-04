@@ -1,0 +1,12 @@
+{
+  "title": "StreamResponse",
+  "type": "object",
+  "properties": {
+    "location": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "location"
+  ]
+}
