@@ -3,27 +3,87 @@ import React, {
 	Component,
 	PropTypes,
 } from "react";
+import reqwest from "reqwest";
+import Readability from "../../readability";
 
 class AvesPlayer extends Component {
 
+	static API_URL = "https://svbdwjhyck.execute-api.eu-west-1.amazonaws.com/development/audio";
+
 	constructor(props) {
 		super(props);
+		this.state = {
+			location: null,
+			playing: false,
+		}
 	}
-
-	componentWillMount() {
-	}
-
 
 	componentDidMount() {
+		// 1. Extract Article from Current Page
+		const article = new Readability({}, document.cloneNode(true)).parse();
+		if (!article) {
+			return;
+		}
+		console.log("Article found");
 
+		// 2. Preparing ID
+		const loc = document.location;
+		const currentURL = loc.href.replace(`${loc.protocol}//`, "");
+		const currentURLBase64 = btoa(currentURL);
+		const currentURLBase64URI = encodeURI(currentURLBase64);
+		console.log("ID created");
+
+		// 3. Packing Payload
+		const payload = {
+			id: currentURLBase64URI,
+			title: article.title,
+			text: article.textContent
+		};
+		console.log("Payload packed");
+
+		// 4. Calling Lambda Function
+		reqwest({
+			url: AvesPlayer.API_URL,
+			method: "POST",
+			contentType: 'application/json',
+			crossOrigin: true,
+			data: JSON.stringify(payload),
+		})
+			.fail((error, message) => {
+				console.log("An Error occured");
+				console.log('error', error);
+				console.log('message', message);
+			})
+			// 5. Adding Result to Player
+			.then(response => {
+				console.log("Response arrived");
+				console.log('response', response);
+				this.setState({
+					location: response.location,
+				});
+				this.audioPlayer.src = response.location;
+			});
 	}
 
-	onClick = event =>{
+	onClick = event => {
 		event.preventDefault();
-		console.log("Starting Playback");
+		if (this.audioPlayer) {
+			if (this.state.playing) {
+				console.log("pausing");
+
+				this.audioPlayer.pause();
+			} else {
+				console.log("playing");
+				this.audioPlayer.play();
+			}
+			this.setState({
+				playing: !this.state.playing,
+			})
+		}
 	};
 
 	render() {
+		const {location} = this.state;
 		const styles = {
 			container: {
 				position: "absolute",
@@ -33,9 +93,11 @@ class AvesPlayer extends Component {
 		};
 		return (
 			<div style={styles.container}>
-				<svg onClick={this.onClick} width="270" height="240">
-					<path d="M5,5H265L135,230"/>
+				<svg onClick={this.onClick} width="64" height="64" fill="#000000">
+					<path d="M 0 0 L 55 32 L 0 64 z" />
 				</svg>
+
+				<audio ref={audioElement => this.audioPlayer = audioElement} />
 			</div>
 		);
 	}
@@ -45,6 +107,6 @@ export default AvesPlayer;
 const PlayerAnchor = document.createElement('div');
 document.body.appendChild(PlayerAnchor);
 ReactDOM.render(
-	<AvesPlayer/>,
+	<AvesPlayer />,
 	PlayerAnchor
 );

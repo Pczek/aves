@@ -26,6 +26,7 @@
     "webpack": "^1.14.0"
   },
   "dependencies": {
+    "readability": "github:mozilla/readability",
     "reqwest": "^2.0.5"
   }
 }
