@@ -9,7 +9,7 @@ const synthesize = text => {
 	const params = {
 		Text: text,
 		OutputFormat: "mp3",
-		SampleRate: "12000",
+		SampleRate: "16000",
 		TextType: "text",
 		VoiceId: "Joey"
 	};
