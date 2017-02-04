@@ -9,7 +9,7 @@ const synthesize = text => {
 	const params = {
 		Text: text,
 		OutputFormat: "mp3",
-		SampleRate: "8000",
+		SampleRate: "12000",
 		TextType: "text",
 		VoiceId: "Joey"
 	};
@@ -18,16 +18,16 @@ const synthesize = text => {
 	return polly.synthesizeSpeech(params).promise();
 };
 
-const saveAudioStream = (as, domain, resource) => {
+const saveAudioStream = (audioStream, domain, resource) => {
 	console.log("saving Audio Stream to S3");
 	const bucket = "getaves.com";
-	const key = `${domain}/${resource}.mp3`;
+	const key = domain + resource + ".mp3";
 	const params = {
 		Bucket: bucket,
 		Key: key,
 		ACL: "public-read",
 		ContentType: "audio/mpeg",
-		Body: as,
+		Body: audioStream,
 	};
 
 	const s3 = new S3();
