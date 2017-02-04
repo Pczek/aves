@@ -60,7 +60,9 @@ const parseURL = rawURL => {
 	};
 };
 
-const handleError = (error, callback)=> {
+const handleError = (service, error, callback) => {
+	console.error("An Error occured using " + service);
+	console.error("error", error);
 	callback(error, null);
 };
 
@@ -69,22 +71,26 @@ exports.handler = (event, context, callback) => {
 		callback("No Event passed!", null);
 	}
 
-	console.log('logGroupName =', context.logGroupName);
-	console.log('logStreamName =', context.logStreamName);
-
 	const obj = parseURL(event.id);
 	let location = null;
-	synthesize(event.text).then(pollyData =>
-		saveAudioStream(pollyData.AudioStream, obj.domain, obj.resource).then(s3Data=> {
-				location = s3Data.Location;
-				addMappingItem({
-					url: obj.url,
-					location: s3Data.Location,
-					customer: obj.domain
-				}).then(dynamoData =>
-					callback(null, {location: location})
-				).catch(error => handleError(error, callback))
-			}
-		).catch(error => handleError(error, callback))
-	).catch(error => handleError(error, callback));
+	console.log("Synthesizing text...");
+	synthesize(event.text).then(pollyData => {
+		console.log("Synthesizing success!");
+		console.log("Saving AudioStream...");
+		saveAudioStream(pollyData.AudioStream, obj.domain, obj.resource).then(s3Data => {
+			console.log("Saving success!");
+			console.log("Mapping Location and Id...");
+			location = s3Data.Location;
+			addMappingItem({
+				url: obj.url,
+				location: s3Data.Location,
+				customer: obj.domain
+			}).then(dynamoData => {
+				console.log("Mapping success!");
+				const result = {location: location};
+				console.log("Returning Result", JSON.stringify(result, null, 2));
+				callback(null, result)
+			}).catch(error => handleError("DynamoDB", error, callback))
+		}).catch(error => handleError("S3", error, callback))
+	}).catch(error => handleError("Polly", error, callback));
 };
