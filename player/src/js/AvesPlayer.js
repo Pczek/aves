@@ -4,7 +4,7 @@ import React, {
 	PropTypes,
 } from "react";
 import reqwest from "reqwest";
-import Readability from "../../readability";
+import Readability from "readability";
 
 class AvesPlayer extends Component {
 
@@ -19,50 +19,47 @@ class AvesPlayer extends Component {
 	}
 
 	componentDidMount() {
-		// 1. Extract Article from Current Page
+		// 1. Check if Audio is already available
+		// 2. Extract Article from Current Page
 		const article = new Readability({}, document.cloneNode(true)).parse();
 		if (!article) {
 			return;
 		}
 		console.log("Article found");
 
-		// 2. Preparing ID
-		const loc = document.location;
-		const currentURL = loc.href.replace(`${loc.protocol}//`, "");
-		const currentURLBase64 = btoa(currentURL);
-		const currentURLBase64URI = encodeURI(currentURLBase64);
-		console.log("ID created");
-
 		// 3. Packing Payload
 		const payload = {
-			id: currentURLBase64URI,
-			title: article.title,
-			text: article.textContent
+			"host": document.location.hostname,
+			"resource": document.location.pathname,
+			"title": article.title,
+			"text": article.textContent.trim(),
 		};
-		console.log("Payload packed");
+		console.log("Payload packed", payload);
 
 		// 4. Calling Lambda Function
-		reqwest({
-			url: AvesPlayer.API_URL,
-			method: "POST",
-			contentType: 'application/json',
-			crossOrigin: true,
-			data: JSON.stringify(payload),
-		})
-			.fail((error, message) => {
-				console.log("An Error occured");
-				console.log('error', error);
-				console.log('message', message);
+		if (true) {
+			reqwest({
+				url: AvesPlayer.API_URL,
+				method: "POST",
+				contentType: 'application/json',
+				crossOrigin: true,
+				data: JSON.stringify(payload),
 			})
-			// 5. Adding Result to Player
-			.then(response => {
-				console.log("Response arrived");
-				console.log('response', response);
-				this.setState({
-					location: response.location,
+				.fail((error, message) => {
+					console.log("An Error occured");
+					console.log('error', error);
+					console.log('message', message);
+				})
+				// 5. Adding Result to Player
+				.then(response => {
+					console.log("Response arrived");
+					console.log('response', response);
+					this.setState({
+						location: response.location,
+					});
+					this.audioPlayer.src = response.location;
 				});
-				this.audioPlayer.src = response.location;
-			});
+		}
 	}
 
 	onClick = event => {
