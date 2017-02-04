@@ -5,6 +5,7 @@ import React, {
 } from "react";
 import reqwest from "reqwest";
 import Readability from "readability";
+import dynamics from "dynamics.js";
 
 class AvesPlayer extends Component {
 
@@ -15,7 +16,8 @@ class AvesPlayer extends Component {
 		this.state = {
 			location: null,
 			playing: false,
-		}
+		};
+
 	}
 
 	componentDidMount() {
@@ -58,19 +60,52 @@ class AvesPlayer extends Component {
 						location: response.location,
 					});
 					this.audioPlayer.src = response.location;
+					this.animateReady();
 				});
 		}
 	}
+
+	animateReady = () => {
+		dynamics.animate(this.triangle, {
+			rotateZ: 90,
+			stroke: "#000000"
+		}, {
+			type: dynamics.spring,
+			friction: 400,
+			duration: 1300
+		});
+	};
+	animatePlaying = () => {
+
+		dynamics.animate(this.triangle, {
+			rotateZ: 180,
+		}, {
+			type: dynamics.spring,
+			friction: 400,
+			duration: 1300
+		});
+	};
+
+	animatePause = () => {
+		dynamics.animate(this.triangle, {
+			rotateZ: 90,
+		}, {
+			type: dynamics.spring,
+			friction: 400,
+			duration: 1300
+		});
+	};
 
 	onClick = event => {
 		event.preventDefault();
 		if (this.audioPlayer) {
 			if (this.state.playing) {
 				console.log("pausing");
-
+				this.animatePause();
 				this.audioPlayer.pause();
 			} else {
 				console.log("playing");
+				this.animatePlaying();
 				this.audioPlayer.play();
 			}
 			this.setState({
@@ -90,8 +125,19 @@ class AvesPlayer extends Component {
 		};
 		return (
 			<div style={styles.container}>
-				<svg onClick={this.onClick} width="64" height="64" fill="#000000">
-					<path d="M 0 0 L 55 32 L 0 64 z" />
+				<svg
+					ref={triangle => this.triangle = triangle}
+					onClick={location ? this.onClick : null}
+					stroke="#eeeeee"
+					strokeWidth="6"
+					fill="white"
+					fillOpacity="0"
+					strokeLinecap="butt"
+					width="50"
+					height="50"
+					viewBox="5 5 95 95"
+				>
+					<path d="M 10 90 L 90 90 L 50 20 z" />
 				</svg>
 
 				<audio ref={audioElement => this.audioPlayer = audioElement} />
