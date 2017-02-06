@@ -21,13 +21,35 @@ class AvesPlayer extends Component {
 	}
 
 	componentDidMount() {
-		// 1. Check if Audio is already available
-		// 2. Extract Article from Current Page
+		// 0. Check if Article on Current Page
 		const article = new Readability({}, document.cloneNode(true)).parse();
 		if (!article) {
 			return;
 		}
 		console.log("Article found");
+
+		// 1. Check if Audio is already available
+		const getPayload = {
+			"host": encodeURIComponent(btoa(document.location.hostname)),
+			"resource": encodeURIComponent(btoa(document.location.pathname)),
+		};
+		reqwest({
+			url: AvesPlayer.API_URL,
+			method: "GET",
+			contentType: 'application/json',
+			crossOrigin: true,
+			data: getPayload,
+		}).fail((error, message) => {
+			console.log("An Error occured");
+			console.log('error', error);
+			console.log('message', message);
+		})
+			.then(response => {
+				console.log("Response arrived");
+				console.log('response', response);
+
+			});
+
 
 		// 3. Packing Payload
 		const payload = {
@@ -39,7 +61,7 @@ class AvesPlayer extends Component {
 		console.log("Payload packed", payload);
 
 		// 4. Calling Lambda Function
-		if (true) {
+		if (false) {
 			reqwest({
 				url: AvesPlayer.API_URL,
 				method: "POST",
