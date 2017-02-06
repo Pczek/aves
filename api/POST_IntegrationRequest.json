@@ -1,0 +1,9 @@
+{
+  "http_method" : "$context.httpMethod",
+  "host" : $input.json('$.host'),
+  "resource" : $input.json('$.resource'),
+  "author" : $input.json('$.author'),
+  "published" : $input.json('$.published'),
+  "title" : $input.json('$.title'),
+  "text" : $input.json('$.text')
+}
