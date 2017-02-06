@@ -9,9 +9,9 @@ const synthesize = text => {
 	const params = {
 		Text: text,
 		OutputFormat: "mp3",
-		SampleRate: "16000",
+		SampleRate: "22050",
 		TextType: "text",
-		VoiceId: "Joey"
+		VoiceId: "Salli"
 	};
 
 	const polly = new Polly();
