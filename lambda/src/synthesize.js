@@ -3,6 +3,7 @@ const DynamoDB = require('aws-sdk/clients/dynamodb');
 const S3 = require('aws-sdk/clients/s3');
 const Polly = require('aws-sdk/clients/polly');
 
+const DYNAMO_TABLE = "mapping";
 
 const synthesize = text => {
 	console.log("synthesizing Text with Polly");
@@ -36,14 +37,29 @@ const saveAudioStream = (audioStream, domain, resource) => {
 
 const addMappingItem = mapping => {
 	console.log("adding Mapping to Dynamo");
-	const TableName = "mapping";
 	const params = {
-		TableName,
+		TableName: DYNAMO_TABLE,
 		Item: mapping,
 	};
 
 	const docClient = new DynamoDB.DocumentClient();
 	return docClient.put(params).promise();
+};
+
+const getMappingItem = url => {
+	console.log("get Mapping from Dynamo");
+	const params = {
+		TableName: DYNAMO_TABLE,
+		Key: {
+			"url": url
+		}
+	};
+	const docClient = new DynamoDB.DocumentClient();
+	return docClient.get(params).promise();
+};
+
+const isEmpty = obj => {
+	return Object.keys(obj).length === 0;
 };
 
 const handleError = (service, error, callback) => {
@@ -52,7 +68,24 @@ const handleError = (service, error, callback) => {
 	callback(error, null);
 };
 
-exports.handler = (event, context, callback) => {
+const handleGetRequest = (event, callback) => {
+	console.log("Handling GET Request");
+
+	getMappingItem(`${event.host}${event.resource}`).then(result => {
+		if (!isEmpty(result)) {
+			if (result.Item.location) {
+
+				callback(null, {location: result.Item.location})
+			}
+		} else {
+			callback("No Mapping found")
+		}
+	}).catch(error => handleError("DynamoDB", error, callback));
+};
+
+const handlePostRequest = (event, callback) => {
+	console.log("Handling POST Request");
+
 	let location = null;
 	// shorten text, max 1500 chars
 	if (event.text.length > 1500) {
@@ -72,4 +105,19 @@ exports.handler = (event, context, callback) => {
 			}).catch(error => handleError("DynamoDB", error, callback))
 		}).catch(error => handleError("S3", error, callback))
 	}).catch(error => handleError("Polly", error, callback));
+};
+
+exports.handler = (event, context, callback) => {
+
+	switch (event.http_method) {
+		case "GET":
+			handleGetRequest(event, callback);
+			break;
+		case "POST":
+			handlePostRequest(event, callback);
+			break;
+		default:
+			callback("not yet implemented")
+	}
+
 };

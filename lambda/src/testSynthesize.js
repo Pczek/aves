@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 const lambda = require('./synthesize');
 
 const mockEvent = {
+	"http_method": "GET",
 	"host": "localhost",
 	"resource": "/index.html",
 	"author": "Jendrik Poloczek",
