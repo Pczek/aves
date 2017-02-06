@@ -1,0 +1,5 @@
+{
+  "http_method" : "$context.httpMethod",
+  "host":"$util.base64Decode($util.urlDecode($input.params('host')))",
+  "resource":"$util.base64Decode($util.urlDecode($input.params('resource')))"
+}
