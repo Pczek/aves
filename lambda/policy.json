@@ -26,7 +26,8 @@
       "Sid": "Stmt1486410260000",
       "Effect": "Allow",
       "Action": [
-        "dynamodb:PutItem"
+        "dynamodb:PutItem",
+        "dynamodb:GetItem"
       ],
       "Resource": [
         "arn:aws:dynamodb:eu-west-1:353598037903:table/mapping"
