@@ -3,61 +3,69 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <title>AVES</title>
+  <meta charset="utf-8">
+  <title>AVES</title>
 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <link href="dist/css/normalize.css" rel="stylesheet">
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inconsolata', monospace;
+  <link href="dist/css/normalize.css" rel="stylesheet">
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+  <style>
+	body {
+	  font-family: 'Inconsolata', monospace;
 
-        }
-        #main {
-            width:100vw;
-            height:100vh;
-            padding: 0;
-            margin: 0;
-            display: -webkit-box;
-            display: -moz-box;
-            display: -ms-flexbox;
-            display: -webkit-flex;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        #title {
-            text-align: center;
-            font-size: 20vh;
+	}
 
-            letter-spacing: 4vh;
-        }
-        .content{
-          width:90vw;
-          max-width: 480px;
-        
-        }
-    </style>
+	#main {
+	  width: 100vw;
+	  height: 100vh;
+	  padding: 0;
+	  margin: 0;
+	  display: -webkit-box;
+	  display: -moz-box;
+	  display: -ms-flexbox;
+	  display: -webkit-flex;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  flex-direction: column;
+	}
+
+	#title {
+	  text-align: center;
+	  font-size: 20vh;
+
+	  letter-spacing: 4vh;
+	}
+
+	.content {
+	  width: 90vw;
+	  max-width: 480px;
+
+	}
+  </style>
 </head>
 
 <body>
 <div id="main">
-    <div class="content" id="title">AVES</div>
-    <div class="content">
-        <p>You are listening to the content of this page. It's an honor to read the first article using Aves.</p>
-        <p>Furthermore, here is a bit more content to read. I hope you have a pleasant listening experience. Feel free
-            to leave feedback to feedback@getaves.com</p>
-        <p>Can you see the black triangle in the top right corner? This is the Actual Player. You can use it to stop this playback.</p>
-        <p>Aves is currently under development, make sure to sign up for the mailing list below to be the first to be notified when it's ready.</p>
-    </div>
+  <div class="content" id="title">AVES</div>
+  <div class="content">
+	<p>You are listening to the content of this page. It's an honor to read the first article using Aves.</p>
+	<p>Furthermore, here is a bit more content to read. I hope you have a pleasant listening experience. Feel free
+	  to leave feedback to feedback@getaves.com</p>
+	<p>Can you see the black triangle in the top right corner? This is the Actual Player. You can use it to stop this
+	  playback.</p>
+	<p>Aves is currently under development, make sure to sign up for the mailing list below to be the first to be
+	  notified when it's ready.</p>
+  </div>
 </div>
 
 <script type="text/javascript" src="dist/js/aves.bundle.js"></script>
+<script>
+	Aves(null, {});
+</script>
 </body>
 
 </html>

@@ -8,6 +8,16 @@ import Readability from "readability";
 import dynamics from "dynamics.js";
 
 class AvesPlayer extends Component {
+	static propTypes = {
+		fill: PropTypes.bool,
+		activeColor: PropTypes.string,
+		inActiveColor: PropTypes.string,
+	};
+	static defaultProps = {
+		fill: false,
+		activeColor: "#000000",
+		inActiveColor: "#EEEEEE"
+	};
 
 	static API_URL = "https://svbdwjhyck.execute-api.eu-west-1.amazonaws.com/development/audio";
 
@@ -21,6 +31,8 @@ class AvesPlayer extends Component {
 	}
 
 	componentDidMount() {
+		const doRequest = false;
+
 		// 0. Check if Article on Current Page
 		const article = new Readability({}, document.cloneNode(true)).parse();
 		if (!article) {
@@ -33,22 +45,23 @@ class AvesPlayer extends Component {
 			"host": encodeURIComponent(btoa(document.location.hostname)),
 			"resource": encodeURIComponent(btoa(document.location.pathname)),
 		};
-		reqwest({
-			url: AvesPlayer.API_URL,
-			method: "GET",
-			contentType: 'application/json',
-			crossOrigin: true,
-			data: getPayload,
-		}).fail((error, message) => {
-			console.log("An Error occured");
-			console.log('error', error);
-			console.log('message', message);
-		})
-			.then(response => {
+		if (doRequest) {
+			reqwest({
+				url: AvesPlayer.API_URL,
+				method: "GET",
+				contentType: "application/json",
+				crossOrigin: true,
+				data: getPayload,
+			}).fail((error, message) => {
+				console.log("An Error occured");
+				console.log("error", error);
+				console.log("message", message);
+			}).then(response => {
 				console.log("Response arrived");
-				console.log('response', response);
+				console.log("response", response);
 
 			});
+		}
 
 
 		// 3. Packing Payload
@@ -61,36 +74,40 @@ class AvesPlayer extends Component {
 		console.log("Payload packed", payload);
 
 		// 4. Calling Lambda Function
-		if (false) {
+		if (doRequest) {
 			reqwest({
 				url: AvesPlayer.API_URL,
 				method: "POST",
-				contentType: 'application/json',
+				contentType: "application/json",
 				crossOrigin: true,
 				data: JSON.stringify(payload),
+			}).fail((error, message) => {
+				console.log("An Error occured");
+				console.log("error", error);
+				console.log("message", message);
 			})
-				.fail((error, message) => {
-					console.log("An Error occured");
-					console.log('error', error);
-					console.log('message', message);
-				})
-				// 5. Adding Result to Player
+			// 5. Adding Result to Player
 				.then(response => {
 					console.log("Response arrived");
-					console.log('response', response);
+					console.log("response", response);
 					this.setState({
 						location: response.location,
 					});
 					this.audioPlayer.src = response.location;
+					this.setState({
+						ready: true,
+					});
 					this.animateReady();
 				});
 		}
 	}
 
 	animateReady = () => {
+		const {activeColor} = this.props;
 		dynamics.animate(this.triangle, {
 			rotateZ: 90,
-			stroke: "#000000"
+			stroke: activeColor,
+			fill: activeColor,
 		}, {
 			type: dynamics.spring,
 			friction: 400,
@@ -137,6 +154,7 @@ class AvesPlayer extends Component {
 	};
 
 	render() {
+		const {inActiveColor, fill} = this.props;
 		const {location} = this.state;
 		const styles = {
 			container: {
@@ -150,10 +168,10 @@ class AvesPlayer extends Component {
 				<svg
 					ref={triangle => this.triangle = triangle}
 					onClick={location ? this.onClick : null}
-					stroke="#eeeeee"
+					stroke={inActiveColor}
 					strokeWidth="6"
-					fill="white"
-					fillOpacity="0"
+					fill={inActiveColor}
+					fillOpacity={fill ? 1 : 0}
 					strokeLinecap="butt"
 					width="50"
 					height="50"
@@ -167,11 +185,17 @@ class AvesPlayer extends Component {
 		);
 	}
 }
-export default AvesPlayer;
 
-const PlayerAnchor = document.createElement('div');
-document.body.appendChild(PlayerAnchor);
-ReactDOM.render(
-	<AvesPlayer />,
-	PlayerAnchor
-);
+const aves = (anchorEl, settings) => {
+	console.log("settings", settings);
+	if (!anchorEl) {
+		anchorEl = document.createElement("div");
+		document.body.appendChild(anchorEl);
+	}
+	ReactDOM.render(
+		<AvesPlayer inActiveColor={settings.inActiveColor} fill={settings.fill} />,
+		anchorEl
+	);
+};
+
+window.Aves = aves;
