@@ -58,6 +58,24 @@ const getMappingItem = url => {
 	return docClient.get(params).promise();
 };
 
+const increasePlayCount = item => {
+	console.log(`updating play count of '${item.url}'`);
+	const params = {
+		TableName: DYNAMO_TABLE,
+		Key: {
+			"url": item.url
+		},
+		UpdateExpression: "set plays = plays + :val, updated=:u",
+		ExpressionAttributeValues: {
+			":val": 1,
+			":u": new Date().toISOString()
+		},
+		ReturnValues: "UPDATED_NEW"
+	};
+	const docClient = new DynamoDB.DocumentClient();
+	return docClient.update(params).promise();
+};
+
 const isEmpty = obj => {
 	return Object.keys(obj).length === 0;
 };
@@ -74,7 +92,9 @@ const handleGetRequest = (event, callback) => {
 	getMappingItem(`${event.host}${event.resource}`).then(result => {
 		if (!isEmpty(result)) {
 			if (result.Item.location) {
-
+				increasePlayCount(result.Item).then(dynamoData => {
+					console.log(`updated: ${dynamoData.Attributes.updated}`);
+				}).catch(error => handleError("DynamoDB", error, callback));
 				callback(null, {location: result.Item.location})
 			}
 		} else {
@@ -96,8 +116,10 @@ const handlePostRequest = (event, callback) => {
 			location = s3Data.Location;
 			addMappingItem({
 				url: event.host + event.resource,
+				customer: event.host,
+				plays: 1, // this is the first play
 				location: s3Data.Location,
-				customer: event.host
+				created: new Date().toISOString(),
 			}).then(dynamoData => {
 				const result = {location: location};
 				console.log("Returning Result", JSON.stringify(result, null, 2));
