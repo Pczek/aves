@@ -15,19 +15,19 @@
     "published": {
       "type": "string"
     },
-    "title": {
-      "description": "Title of the Content",
-      "type": "string"
-    },
     "text": {
       "description": "Content text",
-      "type": "string"
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
     }
   },
   "required": [
     "host",
     "resource",
-    "title",
     "text"
   ]
 }
