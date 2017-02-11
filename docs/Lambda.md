@@ -2,6 +2,7 @@
 
 + [Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
 + [Lambda+API Gateway](https://docs.aws.amazon.com/lambda/latest/dg/with-on-demand-https.html)
++ [Lambda Proxy Integration (HTTP Status codes)](http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html#api-gateway-proxy-integration-lambda-function-nodejs)
 
 ## Pricing
 
