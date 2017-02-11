@@ -19,7 +19,31 @@ class AvesPlayer extends Component {
 		inActiveColor: "#EEEEEE"
 	};
 
+	static POLLY_MAX_CHARS = 1500;
 	static API_URL = "https://svbdwjhyck.execute-api.eu-west-1.amazonaws.com/development/audio";
+
+	static biteSize = part => {
+		if (part.length < AvesPlayer.POLLY_MAX_CHARS + 1) {
+			return part;
+		}
+		console.log("biteSizing:", part.slice(0, 15));
+		const length = part.length;
+		const subPartsAmount = Math.ceil(length / AvesPlayer.POLLY_MAX_CHARS);
+		const sentences = part.split(". ");
+		const chunkSize = sentences.length / subPartsAmount;
+		let subParts = [];
+
+		//TODO NOT THE best implementation yet, because it does not take into account the amount of subParts it should be. Thereby the length of the last part varies!
+		for (let subPartIndex = 0; subPartIndex < subPartsAmount; subPartIndex++) {
+			subParts[subPartIndex] = []; //initialize each subPart
+			while (sentences[0] && (subParts[subPartIndex].map(sp => sp.length).reduce((a, b) => a + b, 0) + sentences[0].length) < AvesPlayer.POLLY_MAX_CHARS) {
+				subParts[subPartIndex] = subParts[subPartIndex].concat(sentences.splice(0, 1));
+			}
+			subParts[subPartIndex] = subParts[subPartIndex].join(". ");
+		}
+
+		return subParts;
+	};
 
 	constructor(props) {
 		super(props);
@@ -45,7 +69,7 @@ class AvesPlayer extends Component {
 			"host": encodeURIComponent(btoa(document.location.hostname)),
 			"resource": encodeURIComponent(btoa(document.location.pathname)),
 		};
-		if (doRequest) {
+		if (false) {
 			reqwest({
 				url: AvesPlayer.API_URL,
 				method: "GET",
@@ -64,17 +88,41 @@ class AvesPlayer extends Component {
 		}
 
 
+		// 2. Preparing Text to synthesize
+		// split article into lines
+		const lineList = article.textContent.trim().split('\n').map(line => line.trim()).filter(line => line.length);
+		// concat lines into parts
+		let parts = [];
+		let partNo = 0;
+		lineList.forEach((line, index) => {
+			if (index == 0) {
+				parts[partNo] = line;
+			} else {
+				if (line.includes(".")) {
+					parts[partNo] = parts[partNo] + `\n${line}`
+				} else {
+					partNo += 1;
+					// TODO add SSML Break because new section. Break before new heading and afterwards!
+					parts[partNo] = line
+				}
+			}
+		});
+		parts.unshift(article.title);
+
+		// chunk too long parts
+		parts = parts.map(part => AvesPlayer.biteSize(part)).reduce((acc, cur) => acc.concat(cur), []);
+
 		// 3. Packing Payload
 		const payload = {
 			"host": document.location.hostname,
 			"resource": document.location.pathname,
-			"title": article.title,
-			"text": article.textContent.trim(),
+			"text": parts,
 		};
 		console.log("Payload packed", payload);
 
+		console.log(JSON.stringify(payload));
 		// 4. Calling Lambda Function
-		if (doRequest) {
+		if (false) {
 			reqwest({
 				url: AvesPlayer.API_URL,
 				method: "POST",
