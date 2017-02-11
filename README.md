@@ -6,6 +6,7 @@
 + [Compability Table Javascript](http://kangax.github.io/compat-table/es6/)
 + [Polly Docs](http://docs.aws.amazon.com/polly/latest/dg/what-is.html)
 + [Lambda Docs](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
++ [DynamoDB Node Tutorial](http://docs.aws.amazon.com/amazondynamodb/latest/gettingstartedguide/GettingStarted.NodeJs.html)
 + [SSML](https://www.w3.org/TR/2010/REC-speech-synthesis11-20100907/)
 
 ## More Information
@@ -13,6 +14,7 @@
 + [Requirements](./docs/Requirements.md)
 + [Polly](./docs/Polly.md)
 + [Lambda](./docs/Lambda.md)
++ [DynamoDB](./docs/DynamoDB.md)
 + [Text Extraction](./docs/TextExtraction.md)
 
 ## Need to Read
