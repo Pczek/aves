@@ -19,10 +19,10 @@ const synthesize = text => {
 	return polly.synthesizeSpeech(params).promise();
 };
 
-const saveAudioStream = (audioStream, domain, resource) => {
+const saveAudioStream = (audioStream, domain, resource, partNo) => {
 	console.log("saving Audio Stream to S3");
 	const bucket = "getaves.com";
-	const key = domain + resource + ".mp3";
+	const key = `${domain}${resource}.part${partNo}.mp3`;
 	const params = {
 		Bucket: bucket,
 		Key: key,
@@ -106,27 +106,24 @@ const handleGetRequest = (event, callback) => {
 const handlePostRequest = (event, callback) => {
 	console.log("Handling POST Request");
 
-	let location = null;
-	// shorten text, max 1500 chars
-	if (event.text.length > 1500) {
-		event.text = event.text.substring(0, 1500);
-	}
-	synthesize(event.text).then(pollyData => {
-		saveAudioStream(pollyData.AudioStream, event.host, event.resource).then(s3Data => {
-			location = s3Data.Location;
+	Promise.all(event.text.map(part => synthesize(part))).then(pollyResults => {
+		Promise.all(
+			pollyResults.map((pollyData, partNo) => saveAudioStream(pollyData.AudioStream, event.host, event.resource, partNo))
+		).then(s3Results => {
+			const locations = s3Results.map(s3Data => s3Data.Location);
 			addMappingItem({
 				url: event.host + event.resource,
 				customer: event.host,
 				plays: 1, // this is the first play
-				location: s3Data.Location,
+				files: locations,
 				created: new Date().toISOString(),
 			}).then(dynamoData => {
-				const result = {location: location};
+				const result = {locations: locations};
 				console.log("Returning Result", JSON.stringify(result, null, 2));
 				callback(null, result)
-			}).catch(error => handleError("DynamoDB", error, callback))
-		}).catch(error => handleError("S3", error, callback))
-	}).catch(error => handleError("Polly", error, callback));
+			}).catch(dynamoError => handleError("DynamoDB", dynamoError, callback))
+		}).catch(s3Errors => handleError("S3", s3Errors, callback));
+	}).catch(pollyErrors => handleError("Polly", pollyErrors, callback));
 };
 
 exports.handler = (event, context, callback) => {
