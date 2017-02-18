@@ -33,7 +33,7 @@ class AvesPlayer extends Component {
 		const chunkSize = sentences.length / subPartsAmount;
 		let subParts = [];
 
-		//TODO NOT THE best implementation yet, because it does not take into account the amount of subParts it should be. Thereby the length of the last part varies!
+		//TODO not the best implementation yet, because it does not take into account the amount of subParts it should be. Thereby the length of the last part varies!
 		for (let subPartIndex = 0; subPartIndex < subPartsAmount; subPartIndex++) {
 			subParts[subPartIndex] = []; //initialize each subPart
 			while (sentences[0] && (subParts[subPartIndex].map(sp => sp.length).reduce((a, b) => a + b, 0) + sentences[0].length) < AvesPlayer.POLLY_MAX_CHARS) {
@@ -49,9 +49,9 @@ class AvesPlayer extends Component {
 		super(props);
 		this.state = {
 			location: null,
+			ready: false,
 			playing: false,
 		};
-
 	}
 
 	componentDidMount() {
@@ -65,11 +65,22 @@ class AvesPlayer extends Component {
 		console.log("Article found");
 
 		// 1. Check if Audio is already available
-		const getPayload = {
-			"host": encodeURIComponent(btoa(document.location.hostname)),
-			"resource": encodeURIComponent(btoa(document.location.pathname)),
-		};
-		if (false) {
+		this.requestAudio().then(locations => this.feedPlayer(locations)).catch(error => {
+			console.log("request error:", error);
+			this.synthesizeAudio(article).then(locations => this.feedPlayer(locations)).catch(error => {
+				console.log("synth error:", error);
+			});
+		});
+
+	}
+
+	requestAudio = () => {
+		console.log("Requesting Audio...");
+		return new Promise((resolve, reject) => {
+			const getPayload = {
+				"host": encodeURIComponent(btoa(document.location.hostname)),
+				"resource": encodeURIComponent(btoa(document.location.pathname)),
+			};
 			reqwest({
 				url: AvesPlayer.API_URL,
 				method: "GET",
@@ -77,52 +88,60 @@ class AvesPlayer extends Component {
 				crossOrigin: true,
 				data: getPayload,
 			}).fail((error, message) => {
-				console.log("An Error occured");
+				console.log("An Error occurred");
 				console.log("error", error);
 				console.log("message", message);
+				reject(error);
 			}).then(response => {
 				console.log("Response arrived");
 				console.log("response", response);
 
-			});
-		}
-
-
-		// 2. Preparing Text to synthesize
-		// split article into lines
-		const lineList = article.textContent.trim().split('\n').map(line => line.trim()).filter(line => line.length);
-		// concat lines into parts
-		let parts = [];
-		let partNo = 0;
-		lineList.forEach((line, index) => {
-			if (index == 0) {
-				parts[partNo] = line;
-			} else {
-				if (line.includes(".")) {
-					parts[partNo] = parts[partNo] + `\n${line}`
+				//TODO Work around for wrong HTTP status codes from API Gateway #26
+				if (response.locations) {
+					resolve(response.locations);
 				} else {
-					partNo += 1;
-					// TODO add SSML Break because new section. Break before new heading and afterwards!
-					parts[partNo] = line
+					reject(response.errorMessage)
 				}
-			}
-		});
-		parts.unshift(article.title);
+			});
+		})
+	};
 
-		// chunk too long parts
-		parts = parts.map(part => AvesPlayer.biteSize(part)).reduce((acc, cur) => acc.concat(cur), []);
+	synthesizeAudio = article => {
+		return new Promise((resolve, reject) => {
+			// 2. Preparing Text to synthesize
+			// split article into lines
+			const lineList = article.textContent.trim().split('\n').map(line => line.trim()).filter(line => line.length);
+			// concat lines into parts
+			let parts = [];
+			let partNo = 0;
+			lineList.forEach((line, index) => {
+				if (index == 0) {
+					parts[partNo] = line;
+				} else {
+					if (line.includes(".")) {
+						parts[partNo] = parts[partNo] + `\n${line}`
+					} else {
+						partNo += 1;
+						// TODO add SSML Break because new section. Break before new heading and afterwards!
+						parts[partNo] = line
+					}
+				}
+			});
+			parts.unshift(article.title);
 
-		// 3. Packing Payload
-		const payload = {
-			"host": document.location.hostname,
-			"resource": document.location.pathname,
-			"text": parts,
-		};
-		console.log("Payload packed", payload);
+			// chunk too long parts
+			parts = parts.map(part => AvesPlayer.biteSize(part)).reduce((acc, cur) => acc.concat(cur), []);
 
-		console.log(JSON.stringify(payload));
-		// 4. Calling Lambda Function
-		if (false) {
+			// 3. Packing Payload
+			const payload = {
+				"host": document.location.hostname,
+				"resource": document.location.pathname,
+				"text": parts,
+			};
+			console.log("Payload packed", payload);
+
+			// 4. Calling Lambda Function
+			console.log("making a synth request");
 			reqwest({
 				url: AvesPlayer.API_URL,
 				method: "POST",
@@ -130,25 +149,34 @@ class AvesPlayer extends Component {
 				crossOrigin: true,
 				data: JSON.stringify(payload),
 			}).fail((error, message) => {
-				console.log("An Error occured");
+				console.log("An Error occurred");
 				console.log("error", error);
 				console.log("message", message);
-			})
-			// 5. Adding Result to Player
-				.then(response => {
-					console.log("Response arrived");
-					console.log("response", response);
-					this.setState({
-						location: response.location,
-					});
-					this.audioPlayer.src = response.location;
-					this.setState({
-						ready: true,
-					});
-					this.animateReady();
-				});
-		}
-	}
+				reject(error);
+			}).then(response => {
+				console.log("Response arrived");
+				console.log("response", response);
+				//TODO Work around for wrong HTTP status codes from API Gateway #26
+				if (response.locations) {
+					resolve(response.locations);
+				} else {
+					reject(response.errorMessage)
+				}
+			});
+
+		})
+	};
+
+	feedPlayer = locations => {
+		this.setState({
+			locations: locations,
+		});
+		this.audioPlayer.src = locations[0];
+		this.setState({
+			ready: true,
+		});
+		this.animateReady();
+	};
 
 	animateReady = () => {
 		const {activeColor} = this.props;
@@ -203,7 +231,7 @@ class AvesPlayer extends Component {
 
 	render() {
 		const {inActiveColor, fill} = this.props;
-		const {location} = this.state;
+		const {locations} = this.state;
 		const styles = {
 			container: {
 				position: "absolute",
@@ -215,7 +243,7 @@ class AvesPlayer extends Component {
 			<div style={styles.container}>
 				<svg
 					ref={triangle => this.triangle = triangle}
-					onClick={location ? this.onClick : null}
+					onClick={locations ? this.onClick : null}
 					stroke={inActiveColor}
 					strokeWidth="6"
 					fill={inActiveColor}
