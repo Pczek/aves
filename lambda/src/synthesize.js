@@ -47,7 +47,7 @@ const addMappingItem = mapping => {
 };
 
 const getMappingItem = url => {
-	console.log("get Mapping from Dynamo");
+	console.log(`get Mapping from Dynamo: '${url}'`);
 	const params = {
 		TableName: DYNAMO_TABLE,
 		Key: {
@@ -91,11 +91,12 @@ const handleGetRequest = (event, callback) => {
 
 	getMappingItem(`${event.host}${event.resource}`).then(result => {
 		if (!isEmpty(result)) {
-			if (result.Item.location) {
+			console.log("result", result);
+			if (result.Item.locations) {
 				increasePlayCount(result.Item).then(dynamoData => {
 					console.log(`updated: ${dynamoData.Attributes.updated}`);
 				}).catch(error => handleError("DynamoDB", error, callback));
-				callback(null, {location: result.Item.location})
+				callback(null, {locations: result.Item.locations})
 			}
 		} else {
 			callback("No Mapping found")
@@ -115,7 +116,7 @@ const handlePostRequest = (event, callback) => {
 				url: event.host + event.resource,
 				customer: event.host,
 				plays: 1, // this is the first play
-				files: locations,
+				locations: locations,
 				created: new Date().toISOString(),
 			}).then(dynamoData => {
 				const result = {locations: locations};
