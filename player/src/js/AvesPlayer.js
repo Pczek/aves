@@ -48,30 +48,41 @@ class AvesPlayer extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			location: null,
+			locations: null,
 			ready: false,
-			playing: false,
+			isPlaying: false,
 		};
 	}
 
 	componentDidMount() {
-		const doRequest = false;
-
 		// 0. Check if Article on Current Page
 		const article = new Readability({}, document.cloneNode(true)).parse();
-		if (!article) {
-			return;
-		}
-		console.log("Article found");
+		if (article) {
+			console.log("Article found");
 
-		// 1. Check if Audio is already available
-		this.requestAudio().then(locations => this.feedPlayer(locations)).catch(error => {
-			console.log("request error:", error);
-			this.synthesizeAudio(article).then(locations => this.feedPlayer(locations)).catch(error => {
-				console.log("synth error:", error);
+			const onSuccess = locations => {
+				this.setState({
+					locations: locations,
+					ready: true,
+				}, () => {
+					this.feedPlayer();
+					console.log("this.audioPlayer", this.audioPlayer);
+					this.audioPlayer.addEventListener("ended", this.feedPlayer);
+					this.animateReady();
+				});
+			};
+
+			// 1. Check if Audio is already available
+			this.requestAudio().then(onSuccess).catch(error => {
+				console.log("request error:", error);
+				// 2. Synthesize Audio if not Available
+				this.synthesizeAudio(article).then(onSuccess).catch(error => {
+					console.log("synth error:", error);
+				});
 			});
-		});
-
+		} else {
+			console.log("no article found");
+		}
 	}
 
 	requestAudio = () => {
@@ -108,7 +119,7 @@ class AvesPlayer extends Component {
 
 	synthesizeAudio = article => {
 		return new Promise((resolve, reject) => {
-			// 2. Preparing Text to synthesize
+			// Preparing Text to synthesize
 			// split article into lines
 			const lineList = article.textContent.trim().split('\n').map(line => line.trim()).filter(line => line.length);
 			// concat lines into parts
@@ -132,7 +143,7 @@ class AvesPlayer extends Component {
 			// chunk too long parts
 			parts = parts.map(part => AvesPlayer.biteSize(part)).reduce((acc, cur) => acc.concat(cur), []);
 
-			// 3. Packing Payload
+			// Packing POST Payload
 			const payload = {
 				"host": document.location.hostname,
 				"resource": document.location.pathname,
@@ -140,7 +151,7 @@ class AvesPlayer extends Component {
 			};
 			console.log("Payload packed", payload);
 
-			// 4. Calling Lambda Function
+			// Calling Lambda Function
 			console.log("making a synth request");
 			reqwest({
 				url: AvesPlayer.API_URL,
@@ -167,15 +178,27 @@ class AvesPlayer extends Component {
 		})
 	};
 
-	feedPlayer = locations => {
-		this.setState({
-			locations: locations,
-		});
+	feedPlayer = () => {
+		const {locations} = this.state;
+		const currentlyPlaying = this.audioPlayer.src;
+		if (currentlyPlaying) {
+			console.log("currentlyPlaying", currentlyPlaying);
+			const upNextIndex = locations.findIndex(location => location == currentlyPlaying) + 1;
+			if (upNextIndex < locations.length) {
+				// insert record
+				this.audioPlayer.src = locations[upNextIndex];
+				// starting new record
+				this.audioPlayer.play();
+				return;
+			} else {
+				// last part was played return to paused status
+				this.animatePause();
+				this.setState({
+					isPlaying: false,
+				});
+			}
+		}
 		this.audioPlayer.src = locations[0];
-		this.setState({
-			ready: true,
-		});
-		this.animateReady();
 	};
 
 	animateReady = () => {
@@ -214,17 +237,18 @@ class AvesPlayer extends Component {
 	onClick = event => {
 		event.preventDefault();
 		if (this.audioPlayer) {
-			if (this.state.playing) {
+			const {isPlaying} = this.state;
+			if (isPlaying) {
 				console.log("pausing");
 				this.animatePause();
 				this.audioPlayer.pause();
 			} else {
-				console.log("playing");
+				console.log("isPlaying");
 				this.animatePlaying();
 				this.audioPlayer.play();
 			}
 			this.setState({
-				playing: !this.state.playing,
+				isPlaying: !isPlaying,
 			})
 		}
 	};
