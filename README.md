@@ -8,12 +8,17 @@
 + [S3](https://aws.amazon.com/s3/pricing/)
 + [DynamoDB](https://aws.amazon.com/dynamodb/pricing/)
 
+## HTML Elements
+
++ [\<audio\> Events](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Media_events)
+
 ## More Information
 
 + [Requirements](./docs/Requirements.md)
 + [Text Extraction](./docs/TextExtraction.md)
 
 ### Services
+
 + [Lambda](./docs/Lambda.md)
 + [Polly](./docs/Polly.md)
 + [S3](./docs/S3.md)
