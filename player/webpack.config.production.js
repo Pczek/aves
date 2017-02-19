@@ -4,10 +4,10 @@ const webpack = require('webpack');
 module.exports = {
 
 	devtool: 'cheap-module-source-map',
-	entry: './src/js/diarydash.js',
+	entry: './src/js/AvesPlayer.js',
 	output: {
 		path: './dist/js',
-		filename: 'diarydash.bundle.js',
+		filename: 'aves.bundle.js',
 	},
 
 	plugins: [
