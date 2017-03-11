@@ -1,7 +1,8 @@
 "use strict";
-const DynamoDB = require('aws-sdk/clients/dynamodb');
-const S3 = require('aws-sdk/clients/s3');
-const Polly = require('aws-sdk/clients/polly');
+const DynamoDB = require("aws-sdk/clients/dynamodb");
+const S3 = require("aws-sdk/clients/s3");
+const Polly = require("aws-sdk/clients/polly");
+const crypto = require("crypto");
 
 const DYNAMO_TABLE = "mapping";
 
@@ -47,7 +48,7 @@ const addMappingItem = mapping => {
 };
 
 const getMappingItem = url => {
-	console.log(`get Mapping from Dynamo: '${url}'`);
+	console.log(`get Mapping from Dynamo: "${url}"`);
 	const params = {
 		TableName: DYNAMO_TABLE,
 		Key: {
@@ -59,7 +60,7 @@ const getMappingItem = url => {
 };
 
 const increasePlayCount = item => {
-	console.log(`updating play count of '${item.url}'`);
+	console.log(`updating play count of "${item.url}"`);
 	const params = {
 		TableName: DYNAMO_TABLE,
 		Key: {
@@ -84,6 +85,12 @@ const handleError = (service, error, callback) => {
 	console.error("An Error occurred using " + service);
 	console.error("error", error);
 	callback(error, null);
+};
+
+const digestText = text => {
+	const hash = crypto.createHash("md5");
+	hash.update(JSON.stringify(text));
+	return hash.digest("hex");
 };
 
 const handleGetRequest = (event, callback) => {
@@ -112,15 +119,16 @@ const handlePostRequest = (event, callback) => {
 			pollyResults.map((pollyData, partNo) => saveAudioStream(pollyData.AudioStream, event.host, event.resource, partNo))
 		).then(s3Results => {
 			const locations = s3Results.map(s3Data => s3Data.Location);
+			const hash = digestText(event.text);
 			addMappingItem({
 				url: event.host + event.resource,
 				customer: event.host,
 				plays: 1, // this is the first play
 				locations: locations,
+				hash: hash,
 				created: new Date().toISOString(),
 			}).then(dynamoData => {
-				const result = {locations: locations};
-				console.log("Returning Result", JSON.stringify(result, null, 2));
+				const result = {hash: hash, locations: locations};
 				callback(null, result)
 			}).catch(dynamoError => handleError("DynamoDB", dynamoError, callback))
 		}).catch(s3Errors => handleError("S3", s3Errors, callback));
