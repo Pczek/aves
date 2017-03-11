@@ -89,7 +89,7 @@ const handleError = (service, error, callback) => {
 
 const digestText = text => {
 	const hash = crypto.createHash("md5");
-	hash.update(JSON.stringify(text));
+	hash.update(new Buffer(text.join(""),"utf8"));
 	return hash.digest("hex");
 };
 
@@ -103,7 +103,10 @@ const handleGetRequest = (event, callback) => {
 				increasePlayCount(result.Item).then(dynamoData => {
 					console.log(`updated: ${dynamoData.Attributes.updated}`);
 				}).catch(error => handleError("DynamoDB", error, callback));
-				callback(null, {locations: result.Item.locations})
+				callback(null, {
+					hash: result.Item.hash,
+					locations: result.Item.locations
+				})
 			}
 		} else {
 			callback("No Mapping found")

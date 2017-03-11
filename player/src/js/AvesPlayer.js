@@ -6,6 +6,8 @@ import React, {
 import reqwest from "reqwest";
 import Readability from "readability";
 import dynamics from "dynamics.js";
+import {createHash} from "crypto";
+import bopsFrom from "bops/from";
 
 class AvesPlayer extends Component {
 	static propTypes = {
@@ -14,7 +16,7 @@ class AvesPlayer extends Component {
 		inActiveColor: PropTypes.string,
 	};
 	static defaultProps = {
-		fill: false,
+		fill: true,
 		activeColor: "#000000",
 		inActiveColor: "#EEEEEE"
 	};
@@ -59,6 +61,8 @@ class AvesPlayer extends Component {
 		const article = new Readability({}, document.cloneNode(true)).parse();
 		if (article) {
 			console.log("Article found");
+			const text = this.prepareText(article);
+			const hash = this.digestText(text);
 
 			const onSuccess = locations => {
 				this.setState({
@@ -73,10 +77,9 @@ class AvesPlayer extends Component {
 			};
 
 			// 1. Check if Audio is already available
-			this.requestAudio().then(onSuccess).catch(error => {
-				console.log("request error:", error);
+			this.requestAudio(hash).then(onSuccess).catch(error => {
 				// 2. Synthesize Audio if not Available
-				this.synthesizeAudio(article).then(onSuccess).catch(error => {
+				this.synthesizeAudio(text).then(onSuccess).catch(error => {
 					console.log("synth error:", error);
 				});
 			});
@@ -85,7 +88,13 @@ class AvesPlayer extends Component {
 		}
 	}
 
-	requestAudio = () => {
+	digestText = text => {
+		const hash = createHash("md5");
+		hash.update(bopsFrom(text.join(""),"utf8"));
+		return hash.digest("hex");
+	};
+
+	requestAudio = hash => {
 		console.log("Requesting Audio...");
 		return new Promise((resolve, reject) => {
 			const getPayload = {
@@ -108,8 +117,12 @@ class AvesPlayer extends Component {
 				console.log("response", response);
 
 				//TODO Work around for wrong HTTP status codes from API Gateway #26
-				if (response.locations) {
-					resolve(response.locations);
+				if (response.locations && response.hash) {
+					if (response.hash == hash) {
+						resolve(response.locations);
+					} else {
+						reject("article changed")
+					}
 				} else {
 					reject(response.errorMessage)
 				}
@@ -117,37 +130,39 @@ class AvesPlayer extends Component {
 		})
 	};
 
-	synthesizeAudio = article => {
-		return new Promise((resolve, reject) => {
-			// Preparing Text to synthesize
-			// split article into lines
-			const lineList = article.textContent.trim().split('\n').map(line => line.trim()).filter(line => line.length);
-			// concat lines into parts
-			let parts = [];
-			let partNo = 0;
-			lineList.forEach((line, index) => {
-				if (index == 0) {
-					parts[partNo] = line;
+	prepareText = article => {
+		// Preparing Text to synthesize
+		// split article into lines
+		const lineList = article.textContent.trim().split('\n').map(line => line.trim()).filter(line => line.length);
+		// concat lines into parts
+		let parts = [];
+		let partNo = 0;
+		lineList.forEach((line, index) => {
+			if (index == 0) {
+				parts[partNo] = line;
+			} else {
+				if (line.includes(".")) {
+					parts[partNo] = parts[partNo] + `\n${line}`
 				} else {
-					if (line.includes(".")) {
-						parts[partNo] = parts[partNo] + `\n${line}`
-					} else {
-						partNo += 1;
-						// TODO add SSML Break because new section. Break before new heading and afterwards!
-						parts[partNo] = line
-					}
+					partNo += 1;
+					// TODO add SSML Break because new section. Break before new heading and afterwards!
+					parts[partNo] = line
 				}
-			});
-			parts.unshift(article.title);
+			}
+		});
+		parts.unshift(article.title);
 
-			// chunk too long parts
-			parts = parts.map(part => AvesPlayer.biteSize(part)).reduce((acc, cur) => acc.concat(cur), []);
+		// chunk too long parts
+		return parts.map(part => AvesPlayer.biteSize(part)).reduce((acc, cur) => acc.concat(cur), []);
+	};
 
+	synthesizeAudio = text => {
+		return new Promise((resolve, reject) => {
 			// Packing POST Payload
 			const payload = {
 				"host": document.location.hostname,
 				"resource": document.location.pathname,
-				"text": parts,
+				"text": text,
 			};
 			console.log("Payload packed", payload);
 
@@ -174,7 +189,6 @@ class AvesPlayer extends Component {
 					reject(response.errorMessage)
 				}
 			});
-
 		})
 	};
 
