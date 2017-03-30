@@ -273,11 +273,7 @@ class AvesPlayer extends Component {
 		const {inActiveColor, fill} = this.props;
 		const {locations} = this.state;
 		const styles = {
-			container: {
-				position: "absolute",
-				top: "1em",
-				left: "1em",
-			}
+			container: {}
 		};
 		return (
 			<div style={styles.container}>
@@ -306,7 +302,10 @@ const aves = (anchorEl, settings) => {
 	console.log("settings", settings);
 	if (!anchorEl) {
 		anchorEl = document.createElement("div");
-		document.body.appendChild(anchorEl);
+		anchorEl.style.position = "fixed";
+		anchorEl.style.top = "1em";
+		anchorEl.style.right = "1em";
+		document.body.insertBefore(anchorEl, document.body.firstChild);
 	} else {
 		const avesContainer = document.createElement("div");
 		anchorEl.appendChild(avesContainer);
