@@ -105,6 +105,7 @@ const handleGetRequest = (event, callback) => {
 				}).catch(error => handleError("DynamoDB", error, callback));
 				callback(null, {
 					hash: result.Item.hash,
+					player_version: result.Item.player_version || 1,
 					locations: result.Item.locations
 				})
 			}
