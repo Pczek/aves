@@ -10,6 +10,8 @@ import {createHash} from "crypto";
 import bopsFrom from "bops/from";
 
 class AvesPlayer extends Component {
+	static VERSION = 1.0;
+
 	static propTypes = {
 		fill: PropTypes.bool,
 		activeColor: PropTypes.string,
@@ -70,7 +72,6 @@ class AvesPlayer extends Component {
 					ready: true,
 				}, () => {
 					this.feedPlayer();
-					console.log("this.audioPlayer", this.audioPlayer);
 					this.audioPlayer.addEventListener("ended", this.feedPlayer);
 					this.animateReady();
 				});
@@ -78,19 +79,20 @@ class AvesPlayer extends Component {
 
 			// 1. Check if Audio is already available
 			this.requestAudio(hash).then(onSuccess).catch(error => {
+				console.log("Error during AUDIO request:", error);
 				// 2. Synthesize Audio if not Available
 				this.synthesizeAudio(text).then(onSuccess).catch(error => {
-					console.log("synth error:", error);
+					console.log("Error during SYNTH request:", error);
 				});
 			});
 		} else {
-			console.log("no article found");
+			console.log("No article found. Your text might be to short.");
 		}
 	}
 
 	digestText = text => {
 		const hash = createHash("md5");
-		hash.update(bopsFrom(text.join(""),"utf8"));
+		hash.update(bopsFrom(text.join(""), "utf8"));
 		return hash.digest("hex");
 	};
 
@@ -118,9 +120,10 @@ class AvesPlayer extends Component {
 
 				//TODO Work around for wrong HTTP status codes from API Gateway #26
 				if (response.locations && response.hash) {
-					if (response.hash == hash) {
+					if (response.hash === hash && response.player_version === AvesPlayer.VERSION) {
 						resolve(response.locations);
 					} else {
+						console.log("hash or version is different!");
 						reject("article changed")
 					}
 				} else {
@@ -161,6 +164,7 @@ class AvesPlayer extends Component {
 			// Packing POST Payload
 			const payload = {
 				"host": document.location.hostname,
+				"player_version": AvesPlayer.VERSION,
 				"resource": document.location.pathname,
 				"text": text,
 			};
@@ -253,11 +257,9 @@ class AvesPlayer extends Component {
 		if (this.audioPlayer) {
 			const {isPlaying} = this.state;
 			if (isPlaying) {
-				console.log("pausing");
 				this.animatePause();
 				this.audioPlayer.pause();
 			} else {
-				console.log("isPlaying");
 				this.animatePlaying();
 				this.audioPlayer.play();
 			}
@@ -305,6 +307,11 @@ const aves = (anchorEl, settings) => {
 	if (!anchorEl) {
 		anchorEl = document.createElement("div");
 		document.body.appendChild(anchorEl);
+	} else {
+		const avesContainer = document.createElement("div");
+		anchorEl.appendChild(avesContainer);
+		avesContainer.style.position = "relative";
+		anchorEl = avesContainer;
 	}
 	ReactDOM.render(
 		<AvesPlayer inActiveColor={settings.inActiveColor} fill={settings.fill} />,
