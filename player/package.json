@@ -5,7 +5,7 @@
   "main": "src/js/AvesPlayer.js",
   "scripts": {
     "watch": "webpack --watch --progress -d",
-    "production": "webpack --progress --config ./webpack.config.production.js -p"
+    "production": "webpack --progress -p --config ./webpack.config.production.js "
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
     "babel-preset-stage-1": "^6.16.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
+    "strip-loader": "^0.1.2",
     "webpack": "^1.14.0"
   },
   "dependencies": {
