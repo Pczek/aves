@@ -3,6 +3,7 @@ const lambda = require('./synthesize');
 
 const mockEvent = {
 	"http_method": "POST",
+	"player_version": 1.0,
 	"host": "localhost",
 	"resource": "/aves/player/Blogging.html",
 	"text": [

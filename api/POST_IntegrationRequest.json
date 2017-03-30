@@ -1,5 +1,6 @@
 {
   "http_method" : "$context.httpMethod",
+  "player_version" : $input.json('$.player_version'),
   "host" : $input.json('$.host'),
   "resource" : $input.json('$.resource'),
   "author" : $input.json('$.author'),

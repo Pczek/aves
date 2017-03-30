@@ -89,7 +89,7 @@ const handleError = (service, error, callback) => {
 
 const digestText = text => {
 	const hash = crypto.createHash("md5");
-	hash.update(new Buffer(text.join(""),"utf8"));
+	hash.update(new Buffer(text.join(""), "utf8"));
 	return hash.digest("hex");
 };
 
@@ -123,17 +123,23 @@ const handlePostRequest = (event, callback) => {
 		).then(s3Results => {
 			const locations = s3Results.map(s3Data => s3Data.Location);
 			const hash = digestText(event.text);
+			const player_version = event.player_version;
 			addMappingItem({
 				url: event.host + event.resource,
+				hash: hash,
+				player_version: player_version,
 				customer: event.host,
 				plays: 1, // this is the first play
 				locations: locations,
-				hash: hash,
 				created: new Date().toISOString(),
 			}).then(dynamoData => {
-				const result = {hash: hash, locations: locations};
+				const result = {
+					hash: hash,
+					player_version: player_version,
+					locations: locations
+				};
 				callback(null, result)
-			}).catch(dynamoError => handleError("DynamoDB", dynamoError, callback))
+			}).catch(dynamoError => handleError("DynamoDB", dynamoError, callback));
 		}).catch(s3Errors => handleError("S3", s3Errors, callback));
 	}).catch(pollyErrors => handleError("Polly", pollyErrors, callback));
 };
