@@ -17,6 +17,7 @@ class AvesPlayer extends Component {
 		activeColor: PropTypes.string,
 		inActiveColor: PropTypes.string,
 		apiKey: PropTypes.string,
+		autoPlay: PropTypes.bool,
 	};
 
 	static defaultProps = {
@@ -24,6 +25,7 @@ class AvesPlayer extends Component {
 		activeColor: "#000000",
 		inActiveColor: "#EEEEEE",
 		apiKey: "",
+		autoPlay: false,
 	};
 
 	static POLLY_MAX_CHARS = 1500;
@@ -76,7 +78,11 @@ class AvesPlayer extends Component {
 				}, () => {
 					this.feedPlayer();
 					this.audioPlayer.addEventListener("ended", this.feedPlayer);
-					this.animateReady();
+					this.animateReady(this.props.autoPlay ?
+						() => {
+							this.onClick(null)
+						} : () => {
+						});
 				});
 			};
 
@@ -89,7 +95,7 @@ class AvesPlayer extends Component {
 				});
 			});
 		} else {
-			console.log("No article found. Your text might be to short.");
+			console.info("No article found. Your text might be to short.");
 		}
 	}
 
@@ -225,7 +231,7 @@ class AvesPlayer extends Component {
 		this.audioPlayer.src = locations[0];
 	};
 
-	animateReady = () => {
+	animateReady = callback => {
 		const {activeColor} = this.props;
 		dynamics.animate(this.triangle, {
 			rotateZ: 90,
@@ -234,32 +240,37 @@ class AvesPlayer extends Component {
 		}, {
 			type: dynamics.spring,
 			friction: 400,
-			duration: 1300
+			duration: 1300,
+			complete: callback,
 		});
 	};
-	animatePlaying = () => {
+	animatePlaying = callback => {
 
 		dynamics.animate(this.triangle, {
 			rotateZ: 180,
 		}, {
 			type: dynamics.spring,
 			friction: 400,
-			duration: 1300
+			duration: 1300,
+			complete: callback,
 		});
 	};
 
-	animatePause = () => {
+	animatePause = callback => {
 		dynamics.animate(this.triangle, {
 			rotateZ: 90,
 		}, {
 			type: dynamics.spring,
 			friction: 400,
-			duration: 1300
+			duration: 1300,
+			complete: callback,
 		});
 	};
 
-	onClick = event => {
-		event.preventDefault();
+	onClick = (event = null) => {
+		if (event != null) {
+			event.preventDefault();
+		}
 		if (this.audioPlayer) {
 			const {isPlaying} = this.state;
 			if (isPlaying) {
@@ -304,8 +315,10 @@ class AvesPlayer extends Component {
 	}
 }
 
-const aves = (anchorEl, settings, apiKey = "jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ") => {
+const aves = (anchorEl = null, settings = {}, apiKey = "jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ") => {
+	console.log("anchorEl", anchorEl);
 	console.log("settings", settings);
+	console.log("apiKey", apiKey);
 	if (!anchorEl) {
 		anchorEl = document.createElement("div");
 		anchorEl.style.position = "fixed";
@@ -319,7 +332,12 @@ const aves = (anchorEl, settings, apiKey = "jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2f
 		anchorEl = avesContainer;
 	}
 	ReactDOM.render(
-		<AvesPlayer inActiveColor={settings.inActiveColor} fill={settings.fill} apiKey="jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ"/>,
+		<AvesPlayer
+			inActiveColor={settings.inActiveColor}
+			fill={settings.fill}
+			autoPlay={settings.autoPlay}
+			apiKey="jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ"
+		/>,
 		anchorEl
 	);
 };
