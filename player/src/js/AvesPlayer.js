@@ -16,11 +16,14 @@ class AvesPlayer extends Component {
 		fill: PropTypes.bool,
 		activeColor: PropTypes.string,
 		inActiveColor: PropTypes.string,
+		apiKey: PropTypes.string,
 	};
+
 	static defaultProps = {
 		fill: true,
 		activeColor: "#000000",
-		inActiveColor: "#EEEEEE"
+		inActiveColor: "#EEEEEE",
+		apiKey: "",
 	};
 
 	static POLLY_MAX_CHARS = 1500;
@@ -177,6 +180,9 @@ class AvesPlayer extends Component {
 				method: "POST",
 				contentType: "application/json",
 				crossOrigin: true,
+				headers: {
+					"x-api-key": this.props.apiKey,
+				},
 				data: JSON.stringify(payload),
 			}).fail((error, message) => {
 				console.log("An Error occurred");
@@ -298,7 +304,7 @@ class AvesPlayer extends Component {
 	}
 }
 
-const aves = (anchorEl, settings) => {
+const aves = (anchorEl, settings, apiKey = "jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ") => {
 	console.log("settings", settings);
 	if (!anchorEl) {
 		anchorEl = document.createElement("div");
@@ -313,7 +319,7 @@ const aves = (anchorEl, settings) => {
 		anchorEl = avesContainer;
 	}
 	ReactDOM.render(
-		<AvesPlayer inActiveColor={settings.inActiveColor} fill={settings.fill} />,
+		<AvesPlayer inActiveColor={settings.inActiveColor} fill={settings.fill} apiKey="jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ"/>,
 		anchorEl
 	);
 };
