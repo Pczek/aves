@@ -151,7 +151,7 @@ class AvesPlayer extends Component {
     let parts = []
     let partNo = 0
     lineList.forEach((line, index) => {
-      if (index == 0) {
+      if (index === 0) {
         parts[partNo] = line
       } else {
         if (line.includes('.')) {
@@ -214,7 +214,7 @@ class AvesPlayer extends Component {
     const currentlyPlaying = this.audioPlayer.src
     if (currentlyPlaying) {
       console.log('currentlyPlaying', currentlyPlaying)
-      const upNextIndex = locations.findIndex(location => location == currentlyPlaying) + 1
+      const upNextIndex = locations.findIndex(location => location === currentlyPlaying) + 1
       if (upNextIndex < locations.length) {
         // insert record
         this.audioPlayer.src = locations[upNextIndex]
@@ -269,7 +269,7 @@ class AvesPlayer extends Component {
   }
 
   onClick = (event = null) => {
-    if (event != null) {
+    if (event !== null) {
       event.preventDefault()
     }
     if (this.audioPlayer) {
@@ -291,49 +291,70 @@ class AvesPlayer extends Component {
     const {size, inActiveColor, fill} = this.props
     const {locations} = this.state
     const styles = {
-      container: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
+      container: {},
       player: {}
     }
     return (
       <div style={styles.container}>
-        <div style={styles.player}>
-          <svg
-            ref={triangle => this.triangle = triangle}
-            onClick={locations ? this.onClick : null}
-            stroke={inActiveColor}
-            strokeWidth="6"
-            fill={inActiveColor}
-            fillOpacity={fill ? 1 : 0}
-            strokeLinecap="butt"
-            width={size}
-            height={size}
-            viewBox="5 5 95 95"
-          >
-            <path d="M 10 90 L 90 90 L 50 20 z" />
-          </svg>
+        <svg
+          ref={triangle => this.triangle = triangle}
+          onClick={locations ? this.onClick : null}
+          stroke={inActiveColor}
+          strokeWidth="6"
+          fill={inActiveColor}
+          fillOpacity={fill ? 1 : 0}
+          strokeLinecap="butt"
+          width={size}
+          height={size}
+          viewBox="5 5 95 95"
+        >
+          <path d="M 10 90 L 90 90 L 50 20 z" />
+        </svg>
 
-          <audio ref={audioElement => this.audioPlayer = audioElement} />
-        </div>
+        <audio ref={audioElement => this.audioPlayer = audioElement} />
       </div>
     )
   }
 }
 
+/**
+ * Aves Initializing Call exposed to Window
+ * @param anchorEl element the player will be attached to
+ * @param settings object containing settings concerning the player
+ * @param apiKey API Gateway key to use, uses default trial key
+ */
 const aves = (anchorEl = null, settings = {}, apiKey = 'jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ') => {
+  // Log some debug information
   console.log('anchorEl', anchorEl)
   console.log('settings', settings)
   console.log('apiKey', apiKey)
-  if (!anchorEl) {
+
+  if (!anchorEl) { // handle missing anchor element
     anchorEl = document.createElement('div')
     anchorEl.style.position = 'fixed'
     anchorEl.style.top = '1em'
     anchorEl.style.right = '1em'
     document.body.insertBefore(anchorEl, document.body.firstChild)
+  } else { // prepare given anchor element
+    // adjust styling to position player properly
+    anchorEl.style.display = 'flex'
+    anchorEl.style.flexDirection = 'row'
+    anchorEl.style.justifyContent = 'center'
+    let positionValue = 'center'
+    if (settings.position) {
+      switch (settings.position) {
+        case 'top':
+          positionValue = 'flex-start'
+          break
+        case 'bottom':
+          positionValue = 'flex-end'
+          break
+      }
+    }
+    anchorEl.style.alignItems = positionValue
   }
+
+  // Attaching Player to DOM
   ReactDOM.render(
     <AvesPlayer
       inActiveColor={settings.inActiveColor}
@@ -346,4 +367,5 @@ const aves = (anchorEl = null, settings = {}, apiKey = 'jT3gkpqB949wMOj8H6h0i5At
   )
 }
 
+// Expose Function to Window
 window.Aves = aves
