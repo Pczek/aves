@@ -15,8 +15,8 @@ class AvesPlayer extends Component {
   static propTypes = {
     size: PropTypes.number,
     fill: PropTypes.bool,
-    activeColor: PropTypes.string,
-    inActiveColor: PropTypes.string,
+    color: PropTypes.string,
+    inactiveColor: PropTypes.string,
     apiKey: PropTypes.string,
     autoPlay: PropTypes.bool,
   }
@@ -24,8 +24,8 @@ class AvesPlayer extends Component {
   static defaultProps = {
     size: 30,
     fill: true,
-    activeColor: '#000000',
-    inActiveColor: '#EEEEEE',
+    color: '#000000',
+    inactiveColor: '#EEEEEE',
     apiKey: '',
     autoPlay: false,
   }
@@ -233,11 +233,11 @@ class AvesPlayer extends Component {
   }
 
   animateReady = callback => {
-    const {activeColor} = this.props
+    const {color} = this.props
     dynamics.animate(this.triangle, {
       rotateZ: 0,
-      stroke: activeColor,
-      fill: activeColor,
+      stroke: color,
+      fill: color,
     }, {
       type: dynamics.spring,
       friction: 400,
@@ -288,7 +288,7 @@ class AvesPlayer extends Component {
   }
 
   render () {
-    const {size, inActiveColor, fill} = this.props
+    const {size, inactiveColor, fill} = this.props
     const {locations} = this.state
     const styles = {
       container: {
@@ -302,9 +302,9 @@ class AvesPlayer extends Component {
         <svg
           ref={triangle => this.triangle = triangle}
           onClick={locations ? this.onClick : null}
-          stroke={inActiveColor}
+          stroke={inactiveColor}
           strokeWidth="6"
-          fill={inActiveColor}
+          fill={inactiveColor}
           fillOpacity={fill ? 1 : 0}
           strokeLinecap="butt"
           width={size}
@@ -360,7 +360,8 @@ const aves = (anchorEl = null, settings = {}, apiKey = 'jT3gkpqB949wMOj8H6h0i5At
   // Attaching Player to DOM
   ReactDOM.render(
     <AvesPlayer
-      inActiveColor={settings.inActiveColor}
+      color={settings.color}
+      inactiveColor={settings.inactiveColor}
       size={settings.size}
       fill={settings.fill}
       autoPlay={settings.autoPlay}
