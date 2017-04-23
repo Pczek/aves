@@ -14,6 +14,7 @@ class AvesPlayer extends Component {
 
   static propTypes = {
     size: PropTypes.number,
+    strokeWidth: PropTypes.number,
     fill: PropTypes.bool,
     color: PropTypes.string,
     inactiveColor: PropTypes.string,
@@ -23,7 +24,8 @@ class AvesPlayer extends Component {
 
   static defaultProps = {
     size: 30,
-    fill: true,
+    strokeWidth: 6,
+    fill: false,
     color: '#000000',
     inactiveColor: '#EEEEEE',
     apiKey: '',
@@ -32,6 +34,8 @@ class AvesPlayer extends Component {
 
   static POLLY_MAX_CHARS = 1500
   static API_URL = 'https://svbdwjhyck.execute-api.eu-west-1.amazonaws.com/development/audio'
+  let
+  coordinates = []
 
   static biteSize = part => {
     if (part.length < AvesPlayer.POLLY_MAX_CHARS + 1) {
@@ -63,6 +67,8 @@ class AvesPlayer extends Component {
       ready: false,
       isPlaying: false,
     }
+    const {strokeWidth} = props
+    this.coordinates = [6.699 + strokeWidth / 2, 100 - strokeWidth, 6.699 + strokeWidth / 2, strokeWidth, 93.301 - strokeWidth, 50]
   }
 
   componentDidMount () {
@@ -288,10 +294,11 @@ class AvesPlayer extends Component {
   }
 
   render () {
-    const {size, inactiveColor, fill} = this.props
-    const {locations} = this.state
+    const {size, inactiveColor, fill, strokeWidth} = this.props
+    const {ready} = this.state
     const styles = {
       container: {
+        cursor: ready ? 'pointer' : 'default',
         width: size,
         height: size,
       },
@@ -301,9 +308,9 @@ class AvesPlayer extends Component {
       <div style={styles.container}>
         <svg
           ref={triangle => this.triangle = triangle}
-          onClick={locations ? this.onClick : null}
+          onClick={ready ? this.onClick : null}
           stroke={inactiveColor}
-          strokeWidth="6"
+          strokeWidth={strokeWidth}
           fill={inactiveColor}
           fillOpacity={fill ? 1 : 0}
           strokeLinecap="butt"
@@ -311,7 +318,8 @@ class AvesPlayer extends Component {
           height={size}
           viewBox="0 0 100 100"
         >
-          <polygon points="9.459 95.219,87.781 50, 9.459 4.781" />
+          <polygon
+            points={`${this.coordinates[0]} ${this.coordinates[1]}, ${this.coordinates[2]} ${this.coordinates[3]}, ${this.coordinates[4]} ${this.coordinates[5]}`} />
         </svg>
 
         <audio ref={audioElement => this.audioPlayer = audioElement} />
@@ -363,6 +371,7 @@ const aves = (anchorEl = null, settings = {}, apiKey = 'jT3gkpqB949wMOj8H6h0i5At
       color={settings.color}
       inactiveColor={settings.inactiveColor}
       size={settings.size}
+      strokeWidth={settings.strokeWidth}
       fill={settings.fill}
       autoPlay={settings.autoPlay}
       apiKey="jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ"
