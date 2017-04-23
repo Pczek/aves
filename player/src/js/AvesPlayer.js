@@ -235,20 +235,20 @@ class AvesPlayer extends Component {
   animateReady = callback => {
     const {activeColor} = this.props
     dynamics.animate(this.triangle, {
-      rotateZ: 90,
+      rotateZ: 0,
       stroke: activeColor,
       fill: activeColor,
     }, {
       type: dynamics.spring,
       friction: 400,
-      duration: 1300,
+      duration: 2500,
       complete: callback,
     })
   }
   animatePlaying = callback => {
 
     dynamics.animate(this.triangle, {
-      rotateZ: 180,
+      rotateZ: 90,
     }, {
       type: dynamics.spring,
       friction: 400,
@@ -259,7 +259,7 @@ class AvesPlayer extends Component {
 
   animatePause = callback => {
     dynamics.animate(this.triangle, {
-      rotateZ: 90,
+      rotateZ: 0,
     }, {
       type: dynamics.spring,
       friction: 400,
@@ -291,7 +291,10 @@ class AvesPlayer extends Component {
     const {size, inActiveColor, fill} = this.props
     const {locations} = this.state
     const styles = {
-      container: {},
+      container: {
+        width: size,
+        height: size,
+      },
       player: {}
     }
     return (
@@ -306,9 +309,9 @@ class AvesPlayer extends Component {
           strokeLinecap="butt"
           width={size}
           height={size}
-          viewBox="5 5 95 95"
+          viewBox="0 0 100 100"
         >
-          <path d="M 10 90 L 90 90 L 50 20 z" />
+          <polygon points="9.459 95.219,87.781 50, 9.459 4.781" />
         </svg>
 
         <audio ref={audioElement => this.audioPlayer = audioElement} />
