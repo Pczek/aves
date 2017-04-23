@@ -13,6 +13,7 @@ class AvesPlayer extends Component {
 	static VERSION = 1.0;
 
 	static propTypes = {
+		size: PropTypes.number,
 		fill: PropTypes.bool,
 		activeColor: PropTypes.string,
 		inActiveColor: PropTypes.string,
@@ -21,6 +22,7 @@ class AvesPlayer extends Component {
 	};
 
 	static defaultProps = {
+		size: 30,
 		fill: true,
 		activeColor: "#000000",
 		inActiveColor: "#EEEEEE",
@@ -287,29 +289,36 @@ class AvesPlayer extends Component {
 	};
 
 	render() {
-		const {inActiveColor, fill} = this.props;
+		const {size, inActiveColor, fill} = this.props;
 		const {locations} = this.state;
 		const styles = {
-			container: {}
+			container: {
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+			},
+			player: {}
 		};
 		return (
 			<div style={styles.container}>
-				<svg
-					ref={triangle => this.triangle = triangle}
-					onClick={locations ? this.onClick : null}
-					stroke={inActiveColor}
-					strokeWidth="6"
-					fill={inActiveColor}
-					fillOpacity={fill ? 1 : 0}
-					strokeLinecap="butt"
-					width="50"
-					height="50"
-					viewBox="5 5 95 95"
-				>
-					<path d="M 10 90 L 90 90 L 50 20 z" />
-				</svg>
+				<div style={styles.player}>
+					<svg
+						ref={triangle => this.triangle = triangle}
+						onClick={locations ? this.onClick : null}
+						stroke={inActiveColor}
+						strokeWidth="6"
+						fill={inActiveColor}
+						fillOpacity={fill ? 1 : 0}
+						strokeLinecap="butt"
+						width={size}
+						height={size}
+						viewBox="5 5 95 95"
+					>
+						<path d="M 10 90 L 90 90 L 50 20 z" />
+					</svg>
 
-				<audio ref={audioElement => this.audioPlayer = audioElement} />
+					<audio ref={audioElement => this.audioPlayer = audioElement} />
+				</div>
 			</div>
 		);
 	}
@@ -325,15 +334,11 @@ const aves = (anchorEl = null, settings = {}, apiKey = "jT3gkpqB949wMOj8H6h0i5At
 		anchorEl.style.top = "1em";
 		anchorEl.style.right = "1em";
 		document.body.insertBefore(anchorEl, document.body.firstChild);
-	} else {
-		const avesContainer = document.createElement("div");
-		anchorEl.appendChild(avesContainer);
-		avesContainer.style.position = "relative";
-		anchorEl = avesContainer;
 	}
 	ReactDOM.render(
 		<AvesPlayer
 			inActiveColor={settings.inActiveColor}
+			size={settings.size}
 			fill={settings.fill}
 			autoPlay={settings.autoPlay}
 			apiKey="jT3gkpqB949wMOj8H6h0i5AtYya8lrA66Z2ft2LJ"
