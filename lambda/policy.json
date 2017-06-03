@@ -19,7 +19,7 @@
         "s3:PutObjectAcl"
       ],
       "Resource": [
-        "arn:aws:s3:::getaves.com/*"
+        "arn:aws:s3:::aves-audiodata/*"
       ]
     },
     {

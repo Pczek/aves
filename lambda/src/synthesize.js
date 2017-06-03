@@ -5,6 +5,7 @@ const Polly = require("aws-sdk/clients/polly");
 const crypto = require("crypto");
 
 const DYNAMO_TABLE = "mapping";
+const S3_BUCKET = "aves-audiodata";
 
 const synthesize = text => {
 	console.log("synthesizing Text with Polly");
@@ -22,10 +23,9 @@ const synthesize = text => {
 
 const saveAudioStream = (audioStream, domain, resource, partNo) => {
 	console.log("saving Audio Stream to S3");
-	const bucket = "getaves.com";
 	const key = `${domain}${resource}.part${partNo}.mp3`;
 	const params = {
-		Bucket: bucket,
+		Bucket: S3_BUCKET,
 		Key: key,
 		ACL: "public-read",
 		ContentType: "audio/mpeg",
